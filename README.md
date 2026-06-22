@@ -5,19 +5,19 @@ mensagens personalizadas via **Z-API** (WhatsApp).
 
 ### Funcionalidades
 
-- 📞 **Verificação de WhatsApp** — Antes de enviar, consulta se o número realmente possui WhatsApp (`phone-exists`).
-- ✉️ **Envio automático** — Dispara mensagens personalizadas para cada contato.
-- 📊 **Consulta de fila** — Exibe o status da fila de mensagens aguardando processamento (`send-text-status`).
-- 🛡️ **Tratamento de erros** — Timeout, falha de conexão e erros inesperados são logados e não interrompem a execução.
-- 🗄️ **Integração Supabase** — Busca contatos diretamente de uma tabela no Supabase.
+- **Verificação de WhatsApp** — Antes de enviar, consulta se o número realmente possui WhatsApp (`phone-exists`).
+- **Envio automático** — Dispara mensagens personalizadas para cada contato.
+- **Consulta de fila** — Exibe o status da fila de mensagens aguardando processamento (`send-text-status`).
+- **Tratamento de erros** — Timeout, falha de conexão e erros inesperados são logados e não interrompem a execução.
+- **Integração Supabase** — Busca contatos diretamente de uma tabela no Supabase.
 
-## 🧱 Pré-requisitos
+## Pré-requisitos
 
 - Python 3.10+
 - Conta no [Supabase](https://supabase.com) com uma tabela `contatos`
 - Conta na [Z-API](https://www.z-api.io) com uma instância configurada
 
-## 📦 Versões utilizadas (validadas)
+## Versões utilizadas (validadas)
 
 | Pacote       | Versão  | Observação                                      |
 |--------------|---------|-------------------------------------------------|
@@ -25,11 +25,11 @@ mensagens personalizadas via **Z-API** (WhatsApp).
 | `supabase`   | 2.3.4   |                                                 |
 | `requests`   | 2.31.0  |                                                 |
 | `python-dotenv` | 1.0.1 |                                                 |
-| `httpx`      | < 0.24  | ⚠️ Versões >= 0.24 quebram com a `gotrue` atual |
+| `httpx`      | < 0.24  |  Versões >= 0.24 quebram com a `gotrue` atual |
 
-> ⚠️ **Importante:** a `gotrue` (dependência interna do `supabase`) não é compatível com `httpx>=0.24`. Por isso o `requirements.txt` já trava o `httpx` na versão correta.
+> **Importante:** a `gotrue` (dependência interna do `supabase`) não é compatível com `httpx>=0.24`. Por isso o `requirements.txt` já trava o `httpx` na versão correta.
 
-## 🗄️ Estrutura da tabela `contatos` (Supabase)
+## Estrutura da tabela `contatos` (Supabase)
 
 | Coluna     | Tipo     | Descrição                                |
 |------------|----------|------------------------------------------|
@@ -47,7 +47,7 @@ CREATE TABLE contatos (
 );
 ```
 
-## ⚙️ Configuração
+##  Configuração
 
 ### 1. Clone o repositório
 
@@ -122,8 +122,23 @@ python main.py
 2026-06-22 11:43:40 - INFO - Mensagem enviada com sucesso para <nome de usuario> (5511922223333).
 2026-06-22 11:43:40 - INFO - === Fim da execução ===
 ```
+### 5.1. Quando verifica o numero do whatsapp e dá erro:
+```
+2026-06-22 12:20:57 - INFO - Verificando número 5511123456789 (NUMERO POSSIVEL ERRO TESTE)...
+2026-06-22 12:20:57 - INFO - Z-API: número 5511123456789 NÃO existe no WhatsApp
+2026-06-22 12:20:57 - WARNING - Pulando NUMERO POSSIVEL ERRO TESTE (5511123456789) — número não possui WhatsApp.
+2026-06-22 12:20:57 - INFO - Verificando número 5511111111111 (Teste Erro)...
+2026-06-22 12:20:57 - INFO - Z-API: número 5511111111111 NÃO existe no WhatsApp
+2026-06-22 12:20:57 - WARNING - Pulando Teste Erro (5511111111111) — número não possui WhatsApp.
+2026-06-22 12:20:57 - INFO - Resumo: 1 enviado(s), 2 pulado(s), 3 total.
+2026-06-22 12:20:57 - INFO - Consultando fila de mensagens...
+2026-06-22 12:20:57 - INFO -   Fila — zaapId
+2026-06-22 12:20:57 - INFO -   Fila — messageId
+2026-06-22 12:20:57 - INFO -   Fila — id
+2026-06-22 12:20:57 - INFO - === Fim da execução ===
+```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### `Client.__init__() got an unexpected keyword argument 'proxy'`
 
@@ -135,7 +150,7 @@ Ocorre quando a versão do `httpx` é incompatível com a `gotrue` (dependência
 pip install "httpx<0.24"
 ```
 
-## 🚀 Script de setup rápido (Linux / macOS)
+## Script de setup rápido (Linux / macOS)
 
 ```bash
 chmod +x setup.sh
