@@ -3,6 +3,14 @@
 Script em Python que lê contatos de uma tabela no **Supabase** e envia
 mensagens personalizadas via **Z-API** (WhatsApp).
 
+### Funcionalidades
+
+- 📞 **Verificação de WhatsApp** — Antes de enviar, consulta se o número realmente possui WhatsApp (`phone-exists`).
+- ✉️ **Envio automático** — Dispara mensagens personalizadas para cada contato.
+- 📊 **Consulta de fila** — Exibe o status da fila de mensagens aguardando processamento (`send-text-status`).
+- 🛡️ **Tratamento de erros** — Timeout, falha de conexão e erros inesperados são logados e não interrompem a execução.
+- 🗄️ **Integração Supabase** — Busca contatos diretamente de uma tabela no Supabase.
+
 ## 🧱 Pré-requisitos
 
 - Python 3.10+
