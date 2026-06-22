@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 from services.supabase_service import fetch_contacts, get_client
-from services.zapi_service import send_text
+from services.zapi_service import get_send_status, phone_exists, send_text
 from utils.logger import setup_logger
 
 
@@ -16,7 +16,7 @@ def _load_env_or_raise(key: str) -> str:
     return value
 
 
-def main() -> None:       #colocar todas as credenciais
+def main() -> None:
     setup_logger()
     load_dotenv()
 
@@ -45,7 +45,10 @@ def main() -> None:       #colocar todas as credenciais
         logger.warning("Nenhum contato encontrado. Nada a fazer.")
         return
 
-    logger.info(f"Processando {len(contatos)} contato(s)...") #envio da mensagem, parei aqui!!!!
+    logger.info(f"Processando {len(contatos)} contato(s)...")
+
+    enviados = 0
+    pulados = 0
 
     for contato in contatos:
         nome = contato.get("nome", "").strip()
@@ -55,6 +58,21 @@ def main() -> None:       #colocar todas as credenciais
             logger.warning(f"Contato ignorado — campos 'nome' ou 'telefone' ausentes: {contato}")
             continue
 
+        # 1. Verifica se o número existe no WhatsApp
+        logger.info(f"Verificando número {telefone} ({nome})...")
+        existe = phone_exists(zapi_instance, zapi_token, zapi_client_token, telefone)
+
+        if existe is None:
+            logger.warning(f"Pulando {nome} ({telefone}) — não foi possível verificar o número.")
+            pulados += 1
+            continue
+
+        if not existe:
+            logger.warning(f"Pulando {nome} ({telefone}) — número não possui WhatsApp.")
+            pulados += 1
+            continue
+
+        # 2. Envia a mensagem
         mensagem = f"Olá, {nome} tudo bem com você?"
         logger.info(f"Enviando mensagem para {nome} ({telefone})...")
 
@@ -68,8 +86,23 @@ def main() -> None:       #colocar todas as credenciais
 
         if sucesso:
             logger.info(f"Mensagem enviada com sucesso para {nome} ({telefone}).")
+            enviados += 1
         else:
             logger.error(f"Falha no envio da mensagem para {nome} ({telefone}).")
+
+    logger.info(f"Resumo: {enviados} enviado(s), {pulados} pulado(s), {len(contatos)} total.")
+
+    # 3. Exibe status da fila
+    logger.info("Consultando fila de mensagens...")
+    fila = get_send_status(zapi_instance, zapi_token, zapi_client_token)
+    if fila is not None:
+        for item in fila:
+            if isinstance(item, dict):
+                phone = item.get("phone", "?")
+                status = item.get("status", "?")
+                logger.info(f"  Fila — telefone: {phone} | status: {status}")
+            else:
+                logger.info(f"  Fila — {item}")
 
     logger.info("=== Fim da execução ===")
 
